@@ -15,12 +15,58 @@ server.listen(3001, '127.0.0.1', () => {
 const express = require('express');
 const bodyParser = require('body-parser'); // middleware to parse the body of the request
 const fileUpload = require('express-fileupload'); // middleware to upload file
+const jwt = require('jsonwebtoken'); // middleware to generate and verify jwt
+const dotenv = require('dotenv'); // middleware to load environment variables
+dotenv.config();
+
 const app = express();
 
 app.use(bodyParser.json()); // middleware to parse the body of the request
 app.use(bodyParser.urlencoded({ extended: true })); // middleware to parse the body of the request
 app.use(fileUpload()); // middleware to upload file
 app.use('/uploads', express.static('uploads')); // middleware to serve static files
+
+//
+// controllers
+//
+const CustomerController = require('./controllers/CustomerController');
+const UserController = require('./controllers/UserController');
+const BookController = require('./controllers/BookController');
+
+// 
+// Book API
+//
+app.post('/api/book/create', BookController.create);
+app.get('/api/book/list', BookController.list);
+app.get('/api/book/findById/:id', BookController.findById);
+app.put('/api/book/update/:id', BookController.update);
+app.delete('/api/book/remove/:id', BookController.remove);
+app.get('/api/book/count', BookController.count);
+app.get('/api/book/search/:keyword', BookController.search);
+app.get('/api/book/startsWith/:keyword', BookController.startsWith);
+app.get('/api/book/endsWith/:keyword', BookController.endsWith);
+app.get('/api/book/priceGt', BookController.priceGt);
+app.get('/api/book/priceLt', BookController.priceLt);
+app.get('/api/book/priceBetween', BookController.priceBetween);
+app.get('/api/book/priceNot', BookController.priceNot);
+app.get('/api/book/priceIn', BookController.priceIn);
+app.get('/api/book/findMin', BookController.findMin);
+app.get('/api/book/listBookAndAuthor', BookController.listBookAndAuthor);
+app.get('/api/book/listAuthorAndBook', BookController.listAuthorAndBook);
+app.get('/api/book/listPublisher', BookController.listPublisher);
+app.get('/api/book/list2', BookController.list2);
+
+//
+// Customer API
+//
+app.get('/customers', CustomerController.list);
+app.get('/customers/:id', CustomerController.findById);
+
+//
+// User API
+//
+app.post('/api/user/login', UserController.login);
+app.get('/api/user/verifyToken', UserController.verifyToken);
 
 app.get('/', (req, res) => {
     res.send('Hello World Nodejs In ItGenius');
