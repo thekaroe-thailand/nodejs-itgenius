@@ -18,6 +18,7 @@ const fileUpload = require('express-fileupload'); // middleware to upload file
 const jwt = require('jsonwebtoken'); // middleware to generate and verify jwt
 const dotenv = require('dotenv'); // middleware to load environment variables
 dotenv.config();
+const cors = require('cors'); // CORS = Cross-Origin Resource Sharing
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use(bodyParser.json()); // middleware to parse the body of the request
 app.use(bodyParser.urlencoded({ extended: true })); // middleware to parse the body of the request
 app.use(fileUpload()); // middleware to upload file
 app.use('/uploads', express.static('uploads')); // middleware to serve static files
+app.use(cors()); // middleware to enable cors
 
 //
 // controllers
@@ -55,6 +57,8 @@ app.get('/api/book/listBookAndAuthor', BookController.listBookAndAuthor);
 app.get('/api/book/listAuthorAndBook', BookController.listAuthorAndBook);
 app.get('/api/book/listPublisher', BookController.listPublisher);
 app.get('/api/book/list2', BookController.list2);
+app.get('/api/publisher/list', BookController.publishers);  // {url}/api/publisher/list
+app.get('/api/category/list', BookController.categories);   // {url}/api/category/list
 
 //
 // Customer API
@@ -65,7 +69,7 @@ app.get('/customers/:id', CustomerController.findById);
 //
 // User API
 //
-app.post('/api/user/login', UserController.login);
+app.post('/api/user/signin', UserController.login);
 app.get('/api/user/verifyToken', UserController.verifyToken);
 
 app.get('/', (req, res) => {

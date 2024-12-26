@@ -45,3 +45,10 @@ model Publisher {
   name    String
   authors Author[]
 }
+
+model User {
+  id       Int    @id @default(autoincrement())
+  username String
+  password String
+  name     String
+}

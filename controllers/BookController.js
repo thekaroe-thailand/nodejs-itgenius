@@ -9,7 +9,9 @@ module.exports = {
                     isbn: req.body.isbn,
                     name: req.body.name ?? '',
                     description: req.body.description ?? '',
-                    price: req.body.price ?? 0
+                    price: req.body.price,
+                    categoryId: req.body.categoryId,
+                    authorId: req.body.authorId
                 }
             });
 
@@ -26,6 +28,14 @@ module.exports = {
                 },
                 where: {
                     status: 'active' // WHERE status = 'active'
+                },
+                include: {
+                    author: {
+                        include: {
+                            publisher: true
+                        }
+                    },
+                    category: true
                 }
             });
             res.json(books);
@@ -53,7 +63,13 @@ module.exports = {
                 where: {
                     id: id
                 },
-                data: req.body
+                data: {
+                    isbn: req.body.isbn,
+                    name: req.body.name,
+                    price: req.body.price,
+                    categoryId: req.body.categoryId,
+                    authorId: req.body.authorId
+                }
             });
 
             res.json(book);
@@ -358,5 +374,24 @@ module.exports = {
             }
         });
         res.json(books);
+    },
+    publishers: async (req, res) => {
+        const publishers = await prisma.publisher.findMany({
+            orderBy: {
+                name: 'asc'
+            },
+            include: {
+                authors: true
+            }
+        });
+        res.json(publishers);
+    },
+    categories: async (req, res) => {
+        const categories = await prisma.category.findMany({
+            orderBy: {
+                name: 'asc'
+            }
+        });
+        res.json(categories);
     }
 }

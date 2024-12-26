@@ -1,15 +1,15 @@
 const jwt = require('jsonwebtoken');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
 module.exports = {
-    login: (req, res) => {
-        const users = [
-            { id: 1, username: 'kob', password: '1234' },
-            { id: 2, username: 'mali', password: '1234' }
-        ];
-        const user = users.find(user =>
-            user.username === req.body.username
-            && user.password === req.body.password
-        );
+    login: async (req, res) => {
+        const user = await prisma.user.findFirst({
+            where: {
+                username: req.body.username,
+                password: req.body.password
+            }
+        });
 
         if (!user) return res.json({ message: 'Invalid username or password' });
 
