@@ -24,5 +24,53 @@ module.exports = {
         const decoded = jwt.verify(token, key);
 
         res.json(decoded);
+    },
+    profile: async (req, res) => {
+        try {
+            const headers = req.headers['authorization'];
+            const token = headers.split(' ')[1];
+
+            if (!token) return res.status(401).json({ message: 'Unauthorized' });
+
+            const key = process.env.SECRET_KEY;
+            const decoded = jwt.verify(token, key);
+            const user = await prisma.user.findUnique({
+                select: {
+                    name: true,
+                    username: true
+                },
+                where: {
+                    id: decoded.id
+                }
+            });
+
+            res.json(user);
+        } catch (err) {
+            res.status(500).json({ message: err.message });
+        }
+    },
+    update: async (req, res) => {
+        try {
+            const token = req.headers['authorization'].split(' ')[1];
+
+            if (!token) return res.status(401).json({ message: 'Unauthorized' });
+
+            const decoded = jwt.verify(token, process.env.SECRET_KEY);
+            const payload = {
+                name: req.body.name,
+                username: req.body.username
+            }
+
+            if (req.body.password !== '') payload.password = req.body.password;
+
+            await prisma.user.update({
+                where: { id: decoded.id },
+                data: payload
+            });
+
+            res.json({ message: 'success' });
+        } catch (err) {
+            res.status(500).json({ message: err.message });
+        }
     }
 }

@@ -14,16 +14,26 @@ datasource db {
 }
 
 model Book {
-  id          Int       @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   isbn        String
   name        String
   description String?
   price       Int
-  status      String    @default("active")
+  status      String      @default("active")
   authorId    Int?
-  author      Author?   @relation(fields: [authorId], references: [id])
+  author      Author?     @relation(fields: [authorId], references: [id])
   categoryId  Int?
-  category    Category? @relation(fields: [categoryId], references: [id])
+  category    Category?   @relation(fields: [categoryId], references: [id])
+  saleOrders  SaleOrder[] // childs
+}
+
+model SaleOrder {
+  id        Int      @id @default(autoincrement())
+  bookId    Int
+  book      Book     @relation(fields: [bookId], references: [id])
+  quantity  Int      @default(1)
+  price     Int      @default(0)
+  createdAt DateTime @default(now())
 }
 
 model Category {

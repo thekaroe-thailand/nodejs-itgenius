@@ -28,21 +28,56 @@ app.use(fileUpload()); // middleware to upload file
 app.use('/uploads', express.static('uploads')); // middleware to serve static files
 app.use(cors()); // middleware to enable cors
 
+// 
+// create middleware to check token
+//
+const checkToken = (req, res, next) => {
+    try {
+        const headers = req.headers['authorization'];
+
+        if (headers === undefined) return res.status(401).json({ message: 'Unauthorized' });
+
+        const array = headers.split(' ');
+
+        if (array.length > 0) {
+            const token = array[1];
+
+            if (!token) return res.status(401).json({ message: 'Unauthorized' });
+            const key = process.env.SECRET_KEY;
+            const decoded = jwt.verify(token, key);
+
+            decoded.id !== undefined ? next() : res.status(401).json({ message: 'Unauthorized' });
+        } else {
+            res.status(401).json({ message: 'Unauthorized' });
+        }
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+}
+
 //
 // controllers
 //
 const CustomerController = require('./controllers/CustomerController');
 const UserController = require('./controllers/UserController');
 const BookController = require('./controllers/BookController');
+const SaleOrderController = require('./controllers/SaleOrderController');
+
+// 
+// SaleOrder API
+//
+app.post('/api/sale/create', SaleOrderController.create);
+app.get('/api/sale/list', SaleOrderController.list);
+app.delete('/api/sale/remove/:id', SaleOrderController.remove);
 
 // 
 // Book API
 //
-app.post('/api/book/create', BookController.create);
-app.get('/api/book/list', BookController.list);
-app.get('/api/book/findById/:id', BookController.findById);
-app.put('/api/book/update/:id', BookController.update);
-app.delete('/api/book/remove/:id', BookController.remove);
+app.post('/api/book/create', checkToken, BookController.create); // checkToken is middleware to check token
+app.get('/api/book/list', checkToken, BookController.list);
+app.get('/api/book/findById/:id', checkToken, BookController.findById);
+app.put('/api/book/update/:id', checkToken, BookController.update); // checkToken is middleware to check token
+app.delete('/api/book/remove/:id', checkToken, BookController.remove); // checkToken is middleware to check token
 app.get('/api/book/count', BookController.count);
 app.get('/api/book/search/:keyword', BookController.search);
 app.get('/api/book/startsWith/:keyword', BookController.startsWith);
@@ -71,6 +106,8 @@ app.get('/customers/:id', CustomerController.findById);
 //
 app.post('/api/user/signin', UserController.login);
 app.get('/api/user/verifyToken', UserController.verifyToken);
+app.get('/api/user/profile', UserController.profile);
+app.put('/api/user/update', UserController.update);
 
 app.get('/', (req, res) => {
     res.send('Hello World Nodejs In ItGenius');
